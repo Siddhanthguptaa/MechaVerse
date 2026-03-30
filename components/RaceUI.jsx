@@ -1,13 +1,10 @@
-
-// RaceUI.jsx - UPDATED with Minimap integration
+// RaceUI.jsx - UPDATED StartButton with debugging
 
 import { useEffect, useState } from 'react';
 import useGameStore from '../store/gameStore';
-import Minimap from "./Minimap";
-import { useMultiplayer } from "../hooks/useMultiplayer.jsx";
 
 // ===========================================
-// START BUTTON COMPONENT
+// START BUTTON COMPONENT - WITH DEBUG INFO
 // ===========================================
 export const StartButton = () => {
     const raceState = useGameStore((state) => state.raceState);
@@ -19,6 +16,7 @@ export const StartButton = () => {
     const setHasPassedCheckpoint = useGameStore((state) => state.setHasPassedCheckpoint);
     const setPhysicsEnabled = useGameStore((state) => state.setPhysicsEnabled);
 
+    // Debug: Log the state values
     useEffect(() => {
         console.log('🔍 Start Button Debug:', {
             raceState,
@@ -28,6 +26,7 @@ export const StartButton = () => {
         });
     }, [raceState, sceneLoaded, physicsEnabled]);
 
+    // Force physics enabled after a short delay if not already enabled
     useEffect(() => {
         const timer = setTimeout(() => {
             if (!physicsEnabled) {
@@ -42,15 +41,21 @@ export const StartButton = () => {
         console.log('🏁 Race Starting!');
         setRaceState('racing');
         setStartTime(Date.now());
-        setStartPosition({ x: -10, y: 0, z: -10 });
+        setStartPosition({ x: -10, y: 0, z: -10 }); // Match vehicle start position
         setHasPassedCheckpoint(false);
-
+        
+        // Ensure physics is enabled
         if (!physicsEnabled) {
             setPhysicsEnabled(true);
         }
     };
 
-    if (raceState !== 'waiting') return null;
+    if (raceState !== 'waiting') {
+        return null;
+    }
+
+    // Always show button after 2 seconds, even if not "ready"
+    const isReady = sceneLoaded || physicsEnabled;
 
     return (
         <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-auto">
@@ -58,7 +63,8 @@ export const StartButton = () => {
                 <h2 className="text-4xl font-bold text-white mb-6 text-center">
                     Ready to Race?
                 </h2>
-
+                
+                {/* Debug Info */}
                 <div className="mb-4 text-xs text-gray-400 text-center space-y-1">
                     <div>Scene: {sceneLoaded ? '✅' : '⏳'}</div>
                     <div>Physics: {physicsEnabled ? '✅' : '⏳'}</div>
@@ -70,7 +76,6 @@ export const StartButton = () => {
                 >
                     START RACE
                 </button>
-
                 <p className="text-gray-400 text-sm mt-4 text-center">
                     Use Arrow Keys to drive
                 </p>
@@ -80,16 +85,12 @@ export const StartButton = () => {
 };
 
 // ===========================================
-// RACE HUD COMPONENT (WITH MINIMAP)
+// RACE HUD COMPONENT (unchanged)
 // ===========================================
 export const RaceHUD = () => {
     const raceState = useGameStore((state) => state.raceState);
     const lapCount = useGameStore((state) => state.lapCount);
     const startTime = useGameStore((state) => state.startTime);
-    const carPosition = useGameStore((state) => state.cameraTarget);
-
-    const { remotePlayers } = useMultiplayer();
-
     const [currentTime, setCurrentTime] = useState(0);
 
     useEffect(() => {
@@ -111,43 +112,26 @@ export const RaceHUD = () => {
     if (raceState !== 'racing') return null;
 
     return (
-        <>
-            {/* HUD */}
-            <div className="fixed top-8 left-1/2 transform -translate-x-1/2 z-40 pointer-events-none">
-                <div className="bg-black/60 backdrop-blur-md rounded-xl px-8 py-4 shadow-xl border border-white/20">
-                    <div className="flex items-center gap-8">
-                        <div className="text-center">
-                            <div className="text-gray-400 text-xs uppercase tracking-wider mb-1">Lap</div>
-                            <div className="text-white text-3xl font-bold">{lapCount}/1</div>
-                        </div>
-
-                        <div className="w-px h-12 bg-white/20"></div>
-
-                        <div className="text-center">
-                            <div className="text-gray-400 text-xs uppercase tracking-wider mb-1">Time</div>
-                            <div className="text-green-400 text-3xl font-bold font-mono">
-                                {formatTime(currentTime)}
-                            </div>
-                        </div>
+        <div className="fixed top-8 left-1/2 transform -translate-x-1/2 z-40 pointer-events-none">
+            <div className="bg-black/60 backdrop-blur-md rounded-xl px-8 py-4 shadow-xl border border-white/20">
+                <div className="flex items-center gap-8">
+                    <div className="text-center">
+                        <div className="text-gray-400 text-xs uppercase tracking-wider mb-1">Lap</div>
+                        <div className="text-white text-3xl font-bold">{lapCount}/1</div>
+                    </div>
+                    <div className="w-px h-12 bg-white/20"></div>
+                    <div className="text-center">
+                        <div className="text-gray-400 text-xs uppercase tracking-wider mb-1">Time</div>
+                        <div className="text-green-400 text-3xl font-bold font-mono">{formatTime(currentTime)}</div>
                     </div>
                 </div>
             </div>
-
-            {/* 🗺️ MINIMAP */}
-            <Minimap
-                playerPosition={
-                    carPosition
-                        ? [carPosition.x, carPosition.y, carPosition.z]
-                        : [0, 0, 0]
-                }
-                remotePlayers={remotePlayers}
-            />
-        </>
+        </div>
     );
 };
 
 // ===========================================
-// RACE RESULTS COMPONENT
+// RACE RESULTS COMPONENT (unchanged)
 // ===========================================
 export const RaceResults = () => {
     const raceState = useGameStore((state) => state.raceState);
@@ -155,7 +139,7 @@ export const RaceResults = () => {
     const finishTime = useGameStore((state) => state.finishTime);
     const bestLapTime = useGameStore((state) => state.bestLapTime);
     const resetRace = useGameStore((state) => state.resetRace);
-
+    
     const [isNewRecord, setIsNewRecord] = useState(false);
 
     const lapTime = finishTime && startTime ? finishTime - startTime : 0;
@@ -175,6 +159,10 @@ export const RaceResults = () => {
         return `${minutes}:${seconds.toString().padStart(2, '0')}.${milliseconds.toString().padStart(2, '0')}`;
     };
 
+    const handleRestart = () => {
+        resetRace();
+    };
+
     if (raceState !== 'finished') return null;
 
     return (
@@ -190,14 +178,38 @@ export const RaceResults = () => {
                     )}
                 </div>
 
-                <div className="bg-white/5 rounded-xl p-6 border border-white/10 mb-6">
-                    <div className="text-gray-400 text-sm uppercase mb-2">Your Time</div>
-                    <div className="text-green-400 text-5xl font-bold font-mono">{formatTime(lapTime)}</div>
+                <div className="space-y-4 mb-8">
+                    <div className="bg-white/5 rounded-xl p-6 border border-white/10">
+                        <div className="text-gray-400 text-sm uppercase tracking-wider mb-2">Your Time</div>
+                        <div className="text-green-400 text-5xl font-bold font-mono">{formatTime(lapTime)}</div>
+                    </div>
+
+                    {bestLapTime && (
+                        <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+                            <div className="text-gray-400 text-xs uppercase tracking-wider mb-1">Best Time</div>
+                            <div className="text-yellow-400 text-2xl font-bold font-mono">{formatTime(bestLapTime)}</div>
+                        </div>
+                    )}
+
+                    <div className="grid grid-cols-3 gap-3 text-center">
+                        <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+                            <div className="text-gray-400 text-xs mb-1">Laps</div>
+                            <div className="text-white text-xl font-bold">1</div>
+                        </div>
+                        <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+                            <div className="text-gray-400 text-xs mb-1">Position</div>
+                            <div className="text-white text-xl font-bold">1st</div>
+                        </div>
+                        <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+                            <div className="text-gray-400 text-xs mb-1">Status</div>
+                            <div className="text-green-400 text-xl font-bold">✓</div>
+                        </div>
+                    </div>
                 </div>
 
                 <button
-                    onClick={resetRace}
-                    className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 rounded-xl"
+                    onClick={handleRestart}
+                    className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-4 rounded-xl transition-all duration-200 shadow-lg hover:shadow-green-500/50 hover:scale-105"
                 >
                     Race Again
                 </button>

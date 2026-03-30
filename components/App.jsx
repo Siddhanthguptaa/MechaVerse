@@ -3,8 +3,6 @@ import { useEffect } from 'react'
 import useGameStore from '../store/gameStore'
 import { UIProvider } from './UIContext'
 
-
-
 import Header from './Header'
 import Logo from './Logo'
 import Editor from './Editor'
