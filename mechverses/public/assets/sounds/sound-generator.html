@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicle Sound Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        h1 {
+            color: #4CAF50;
+        }
+        .generator {
+            background: #2a2a2a;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border: 1px solid #444;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin: 10px 5px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        button.play {
+            background: #2196F3;
+        }
+        button.play:hover {
+            background: #0b7dda;
+        }
+        .description {
+            color: #aaa;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        .warning {
+            background: #ff9800;
+            color: #000;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        .success {
+            background: #4CAF50;
+            color: #fff;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>🚗 Vehicle Sound Generator</h1>
+    
+    <div class="warning">
+        <strong>Note:</strong> This generates basic synthesized sounds. For realistic game audio, download real vehicle sounds from the sources listed in the README.md file in this folder.
+    </div>
+
+    <div id="success" class="success">
+        <strong>✓ Sound generated successfully!</strong> Check your downloads folder.
+    </div>
+
+    <div class="generator">
+        <h2>1. Engine Sound</h2>
+        <p class="description">Continuous engine rumble that will vary in pitch based on speed</p>
+        <button class="play" onclick="playEngineSound()">▶ Preview</button>
+        <button onclick="generateEngineSound()">💾 Download engine.mp3</button>
+    </div>
+
+    <div class="generator">
+        <h2>2. Idle Sound</h2>
+        <p class="description">Low idle rumble when vehicle is stationary</p>
+        <button class="play" onclick="playIdleSound()">▶ Preview</button>
+        <button onclick="generateIdleSound()">💾 Download idle.mp3</button>
+    </div>
+
+    <div class="generator">
+        <h2>3. Brake Sound</h2>
+        <p class="description">Tire skid sound when braking hard</p>
+        <button class="play" onclick="playBrakeSound()">▶ Preview</button>
+        <button onclick="generateBrakeSound()">💾 Download brake.mp3</button>
+    </div>
+
+    <div class="generator">
+        <h2>4. Collision Sound</h2>
+        <p class="description">Impact sound when hitting objects</p>
+        <button class="play" onclick="playCollisionSound()">▶ Preview</button>
+        <button onclick="generateCollisionSound()">💾 Download collision.mp3</button>
+    </div>
+
+    <script>
+        // Audio context for generating sounds
+        let audioContext = null;
+        let currentSource = null;
+
+        function getAudioContext() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            return audioContext;
+        }
+
+        function stopCurrentSound() {
+            if (currentSource) {
+                currentSource.stop();
+                currentSource = null;
+            }
+        }
+
+        // Generate engine sound (low frequency rumble with harmonics)
+        function createEngineBuffer(duration = 3) {
+            const ctx = getAudioContext();
+            const sampleRate = ctx.sampleRate;
+            const length = sampleRate * duration;
+            const buffer = ctx.createBuffer(1, length, sampleRate);
+            const data = buffer.getChannelData(0);
+
+            for (let i = 0; i < length; i++) {
+                const t = i / sampleRate;
+                // Base frequency around 80-120 Hz with harmonics
+                let value = 0;
+                value += Math.sin(2 * Math.PI * 100 * t) * 0.3; // Fundamental
+                value += Math.sin(2 * Math.PI * 200 * t) * 0.2; // 2nd harmonic
+                value += Math.sin(2 * Math.PI * 300 * t) * 0.1; // 3rd harmonic
+                value += (Math.random() - 0.5) * 0.05; // Noise
+                data[i] = value;
+            }
+
+            return buffer;
+        }
+
+        // Generate idle sound (lower frequency, quieter)
+        function createIdleBuffer(duration = 3) {
+            const ctx = getAudioContext();
+            const sampleRate = ctx.sampleRate;
+            const length = sampleRate * duration;
+            const buffer = ctx.createBuffer(1, length, sampleRate);
+            const data = buffer.getChannelData(0);
+
+            for (let i = 0; i < length; i++) {
+                const t = i / sampleRate;
+                let value = 0;
+                value += Math.sin(2 * Math.PI * 60 * t) * 0.25; // Lower fundamental
+                value += Math.sin(2 * Math.PI * 120 * t) * 0.15; // 2nd harmonic
+                value += (Math.random() - 0.5) * 0.03; // Less noise
+                data[i] = value;
+            }
+
+            return buffer;
+        }
+
+        // Generate brake/skid sound (white noise with filter sweep)
+        function createBrakeBuffer(duration = 2) {
+            const ctx = getAudioContext();
+            const sampleRate = ctx.sampleRate;
+            const length = sampleRate * duration;
+            const buffer = ctx.createBuffer(1, length, sampleRate);
+            const data = buffer.getChannelData(0);
+
+            for (let i = 0; i < length; i++) {
+                const t = i / sampleRate;
+                // High-frequency noise
+                let value = (Math.random() - 0.5) * 0.6;
+                // Add some tonal component
+                value += Math.sin(2 * Math.PI * 800 * t + Math.random() * Math.PI) * 0.2;
+                value += Math.sin(2 * Math.PI * 1200 * t + Math.random() * Math.PI) * 0.15;
+                data[i] = value;
+            }
+
+            return buffer;
+        }
+
+        // Generate collision sound (short burst of noise with decay)
+        function createCollisionBuffer(duration = 0.5) {
+            const ctx = getAudioContext();
+            const sampleRate = ctx.sampleRate;
+            const length = sampleRate * duration;
+            const buffer = ctx.createBuffer(1, length, sampleRate);
+            const data = buffer.getChannelData(0);
+
+            for (let i = 0; i < length; i++) {
+                const t = i / sampleRate;
+                const decay = Math.exp(-t * 8); // Exponential decay
+                // Low-frequency thump
+                let value = Math.sin(2 * Math.PI * 100 * t) * decay * 0.5;
+                // Metal clang
+                value += Math.sin(2 * Math.PI * 400 * t) * decay * 0.3;
+                value += Math.sin(2 * Math.PI * 800 * t) * decay * 0.2;
+                // Noise burst
+                value += (Math.random() - 0.5) * decay * 0.4;
+                data[i] = value;
+            }
+
+            return buffer;
+        }
+
+        // Play sound functions
+        function playEngineSound() {
+            stopCurrentSound();
+            const ctx = getAudioContext();
+            const buffer = createEngineBuffer(2);
+            const source = ctx.createBufferSource();
+            source.buffer = buffer;
+            source.loop = true;
+            source.connect(ctx.destination);
+            source.start();
+            currentSource = source;
+            setTimeout(stopCurrentSound, 3000);
+        }
+
+        function playIdleSound() {
+            stopCurrentSound();
+            const ctx = getAudioContext();
+            const buffer = createIdleBuffer(2);
+            const source = ctx.createBufferSource();
+            source.buffer = buffer;
+            source.loop = true;
+            source.connect(ctx.destination);
+            source.start();
+            currentSource = source;
+            setTimeout(stopCurrentSound, 3000);
+        }
+
+        function playBrakeSound() {
+            stopCurrentSound();
+            const ctx = getAudioContext();
+            const buffer = createBrakeBuffer(2);
+            const source = ctx.createBufferSource();
+            source.buffer = buffer;
+            source.connect(ctx.destination);
+            source.start();
+            currentSource = source;
+        }
+
+        function playCollisionSound() {
+            stopCurrentSound();
+            const ctx = getAudioContext();
+            const buffer = createCollisionBuffer();
+            const source = ctx.createBufferSource();
+            source.buffer = buffer;
+            source.connect(ctx.destination);
+            source.start();
+            currentSource = source;
+        }
+
+        // Download functions
+        async function bufferToWav(buffer) {
+            const numberOfChannels = buffer.numberOfChannels;
+            const length = buffer.length * numberOfChannels * 2;
+            const arrayBuffer = new ArrayBuffer(44 + length);
+            const view = new DataView(arrayBuffer);
+
+            const sampleRate = buffer.sampleRate;
+            const writeString = (view, offset, string) => {
+                for (let i = 0; i < string.length; i++) {
+                    view.setUint8(offset + i, string.charCodeAt(i));
+                }
+            };
+
+            writeString(view, 0, 'RIFF');
+            view.setUint32(4, 36 + length, true);
+            writeString(view, 8, 'WAVE');
+            writeString(view, 12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true);
+            view.setUint16(22, numberOfChannels, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, sampleRate * numberOfChannels * 2, true);
+            view.setUint16(32, numberOfChannels * 2, true);
+            view.setUint16(34, 16, true);
+            writeString(view, 36, 'data');
+            view.setUint32(40, length, true);
+
+            const channelData = [];
+            for (let i = 0; i < numberOfChannels; i++) {
+                channelData.push(buffer.getChannelData(i));
+            }
+
+            let offset = 44;
+            for (let i = 0; i < buffer.length; i++) {
+                for (let channel = 0; channel < numberOfChannels; channel++) {
+                    const sample = Math.max(-1, Math.min(1, channelData[channel][i]));
+                    view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7FFF, true);
+                    offset += 2;
+                }
+            }
+
+            return new Blob([arrayBuffer], { type: 'audio/wav' });
+        }
+
+        async function downloadBuffer(buffer, filename) {
+            const blob = await bufferToWav(buffer);
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename.replace('.mp3', '.wav'); // Generate as WAV
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showSuccess();
+        }
+
+        function showSuccess() {
+            const successDiv = document.getElementById('success');
+            successDiv.style.display = 'block';
+            setTimeout(() => {
+                successDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        function generateEngineSound() {
+            const buffer = createEngineBuffer(3);
+            downloadBuffer(buffer, 'engine.wav');
+        }
+
+        function generateIdleSound() {
+            const buffer = createIdleBuffer(3);
+            downloadBuffer(buffer, 'idle.wav');
+        }
+
+        function generateBrakeSound() {
+            const buffer = createBrakeBuffer(2);
+            downloadBuffer(buffer, 'brake.wav');
+        }
+
+        function generateCollisionSound() {
+            const buffer = createCollisionBuffer(0.5);
+            downloadBuffer(buffer, 'collision.wav');
+        }
+    </script>
+
+    <div style="margin-top: 40px; padding: 20px; background: #2a2a2a; border-radius: 8px;">
+        <h3>Instructions:</h3>
+        <ol>
+            <li>Click "Preview" to hear each sound</li>
+            <li>Click "Download" to save the sound file</li>
+            <li>Files will be saved as .wav format</li>
+            <li>Move the downloaded files to: <code>public/assets/sounds/</code></li>
+            <li>Rename them to: <code>engine.mp3</code>, <code>idle.mp3</code>, <code>brake.mp3</code>, <code>collision.mp3</code></li>
+            <li>Or keep as .wav files and update the file extensions in <code>useVehicleAudio.js</code></li>
+        </ol>
+        <p><strong>Better Option:</strong> Download realistic car sounds from free sound libraries (see README.md for links)</p>
+    </div>
+</body>
+</html>
