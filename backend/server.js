@@ -7,10 +7,22 @@ const cors = require("cors")
 const app = express()
 
 // ✅ CORS FIX (correct place)
+const allowedOrigins = [
+  "http://localhost:5173",   // Vite dev server
+  "http://localhost:3000",   // React default (just in case)
+  "https://mecha-verse.vercel.app"
+];
+
 app.use(cors({
-  origin: "https://mecha-verse.vercel.app",
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   credentials: true
-}))
+}));
 
 const server = http.createServer(app)
 
@@ -19,11 +31,11 @@ const PORT = process.env.PORT || 3001
 
 const io = new Server(server, {
   cors: {
-    origin: ["https://mecha-verse.vercel.app"],
+    origin: allowedOrigins,
     methods: ["GET", "POST"],
     credentials: true
   },
-})
+});
 
 // Store all active rooms and their players
 const rooms = {}

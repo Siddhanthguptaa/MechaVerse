@@ -2,7 +2,10 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { io } from 'socket.io-client';
 
 // Server URL (Make sure this matches your Node.js server port)
-const SERVER_URL = 'https://mechaverse.onrender.com'; 
+const SERVER_URL =
+  window.location.hostname === "localhost"
+    ? "http://localhost:3001"
+    : "https://mechaverse.onrender.com";
 
 // Socket ko initialize karein, lekin auto-connect na karein
 const socket = io(SERVER_URL, { autoConnect: false }); 
