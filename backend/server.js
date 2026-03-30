@@ -2,14 +2,20 @@
 const express = require("express")
 const http = require("http")
 const { Server } = require("socket.io")
-const cors = require("cors");
+const cors = require("cors")
+
+const app = express()
+
+// ✅ CORS FIX (correct place)
 app.use(cors({
   origin: "https://mecha-verse.vercel.app",
   credentials: true
-}));
-const app = express()
+}))
+
 const server = http.createServer(app)
-const PORT = 3001
+
+// ✅ PORT FIX (important for Render)
+const PORT = process.env.PORT || 3001
 
 const io = new Server(server, {
   cors: {
@@ -17,7 +23,7 @@ const io = new Server(server, {
     methods: ["GET", "POST"],
     credentials: true
   },
-});
+})
 
 // Store all active rooms and their players
 const rooms = {}
@@ -51,27 +57,20 @@ io.on("connection", (socket) => {
 
     rooms[code].players[socket.id] = newPlayer
 
-    if (isNewRoom) {
-      socket.emit("roomAck", {
-        success: true,
-        message: `Room "${code}" created! Share this code to race.`,
-        roomCode: code,
-        username: username,
-      })
-    } else {
-      socket.emit("roomAck", {
-        success: true,
-        message: `Successfully joined room "${code}"!`,
-        roomCode: code,
-        username: username,
-      })
-    }
+    socket.emit("roomAck", {
+      success: true,
+      message: isNewRoom
+        ? `Room "${code}" created! Share this code to race.`
+        : `Successfully joined room "${code}"!`,
+      roomCode: code,
+      username: username,
+    })
 
     socket.emit("roomState", rooms[code].players)
 
     socket.to(code).emit("playerJoined", newPlayer)
 
-    console.log(`[SERVER] Player "${username}" (${socket.id}) joined/created room "${code}"`)
+    console.log(`[SERVER] Player "${username}" (${socket.id}) joined room "${code}"`)
   })
 
   socket.on("playerMove", (data) => {
@@ -81,7 +80,6 @@ io.on("connection", (socket) => {
       rooms[code].players[socket.id].position = position
       rooms[code].players[socket.id].rotation = rotation
 
-      // Broadcast to all others in the room (include username and config)
       socket.to(code).emit("playerMoved", {
         id: socket.id,
         username: rooms[code].players[socket.id].username,
@@ -104,7 +102,6 @@ io.on("connection", (socket) => {
 
         console.log(`[SERVER] Player "${username}" left room "${code}"`)
 
-        // Clean up empty rooms
         if (Object.keys(rooms[code].players).length === 0) {
           delete rooms[code]
         }
@@ -115,5 +112,5 @@ io.on("connection", (socket) => {
 })
 
 server.listen(PORT, () => {
-  console.log(`[SERVER] Racing Server running on http://localhost:${PORT}`)
+  console.log(`[SERVER] Running on port ${PORT}`)
 })
