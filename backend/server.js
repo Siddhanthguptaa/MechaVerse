@@ -2,18 +2,22 @@
 const express = require("express")
 const http = require("http")
 const { Server } = require("socket.io")
-const cors = require("cors")
-
+const cors = require("cors");
+app.use(cors({
+  origin: "https://mecha-verse.vercel.app",
+  credentials: true
+}));
 const app = express()
 const server = http.createServer(app)
 const PORT = 3001
 
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:5173", "http://localhost:3000", "http://127.0.0.1:5173"],
+    origin: ["https://mecha-verse.vercel.app"],
     methods: ["GET", "POST"],
+    credentials: true
   },
-})
+});
 
 // Store all active rooms and their players
 const rooms = {}
