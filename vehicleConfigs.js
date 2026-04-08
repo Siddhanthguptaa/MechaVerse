@@ -164,6 +164,15 @@ const vehicleConfigs = {
             default_addons: {},
             addons: {},
         },
+        formula_1: {
+            name: 'Formula 1 - Generic',
+            make: 'F1',
+            model: 'assets/models/vehicles/formula_1/f1_generic.glb',
+            wheel_offset: 0.8,
+            wheelbase: 2.6,
+            default_addons: {},
+            addons: {},
+        },
     },
     wheels: {
         rims: {

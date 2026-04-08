@@ -4,7 +4,7 @@ import { io } from 'socket.io-client';
 // Server URL (Make sure this matches your Node.js server port)
 const SERVER_URL =
   window.location.hostname === "localhost"
-    ? "http://localhost:3001"
+    ? "http://localhost:5000"
     : "https://mechaverse.onrender.com";
 
 // Socket ko initialize karein, lekin auto-connect na karein

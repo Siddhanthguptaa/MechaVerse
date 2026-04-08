@@ -3,7 +3,7 @@ const express = require("express")
 const http = require("http")
 const { Server } = require("socket.io")
 const cors = require("cors")
-
+require("dotenv").config()
 const app = express()
 
 // ✅ CORS FIX (correct place)
@@ -21,8 +21,12 @@ app.use(cors({
       callback(new Error("Not allowed by CORS"));
     }
   },
-  credentials: true
+  credentials: true,
+  methods: ["GET", "POST", "OPTIONS", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"]
 }));
+
+app.use(express.json());
 
 const server = http.createServer(app)
 
@@ -122,6 +126,10 @@ io.on("connection", (socket) => {
     }
   })
 })
+
+// ✅ AI Routes
+const aiRoutes = require("./ai")
+app.use("/ai", aiRoutes)
 
 server.listen(PORT, () => {
   console.log(`[SERVER] Running on port ${PORT}`)

@@ -9,6 +9,7 @@ import Editor from './Editor'
 import Canvas from './Canvas'
 import Actions from './Actions'
 import Notification from './Notification'
+import AIAssistant from "./AIassistant"
 
 // Import Race UI Components
 import { StartButton, RaceHUD, RaceResults } from './RaceUI'
@@ -31,7 +32,7 @@ export default function App() {
                 <Editor />
                 <Actions />
                 <Notification />
-                
+                <AIAssistant />
                 {/* Race UI Components */}
                 <StartButton />
                 <RaceHUD />

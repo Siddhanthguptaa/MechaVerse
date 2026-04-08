@@ -143,6 +143,22 @@ const Body = memo(({ id, height, color, roughness, addons }) => {
     )
 })
 
+// Invisible wheels for F1 (physics only, no visual rendering)
+const InvisibleWheels = memo(({ wheelPositions, wheelRefs }) => {
+    return (
+        <group name='InvisibleWheels'>
+            {wheelPositions.map(({ key, ...transform }, index) => (
+                <group key={key} ref={wheelRefs[index]} {...transform}>
+                    <mesh visible={false}>
+                        <sphereGeometry args={[0.1]} />
+                        <meshStandardMaterial />
+                    </mesh>
+                </group>
+            ))}
+        </group>
+    )
+})
+
 // ========== VEHICLE COMPONENT WITH forwardRef ==========
 // This allows parent components to access the chassisRef
 const Vehicle = forwardRef((props, ref) => {
@@ -260,19 +276,24 @@ const Vehicle = forwardRef((props, ref) => {
             <CuboidCollider args={colliderArgs} position={colliderPosition} />
             <group name='Vehicle'>
                 <Body key={body} id={body} height={vehicleHeight} color={color} roughness={roughness} addons={addons} />
-                <Wheels
-                    rim={rim}
-                    rim_diameter={rim_diameter}
-                    rim_width={rim_width}
-                    rim_color={rim_color}
-                    rim_color_secondary={rim_color_secondary}
-                    tire={tire}
-                    tire_diameter={tire_diameter}
-                    color={color}
-                    roughness={roughness}
-                    wheelPositions={wheelPositions}
-                    wheelRefs={wheelRefs}
-                />
+                {/* F1 uses invisible wheels for physics, other cars use visible wheels */}
+                {body === 'formula_1' ? (
+                    <InvisibleWheels wheelPositions={wheelPositions} wheelRefs={wheelRefs} />
+                ) : (
+                    <Wheels
+                        rim={rim}
+                        rim_diameter={rim_diameter}
+                        rim_width={rim_width}
+                        rim_color={rim_color}
+                        rim_color_secondary={rim_color_secondary}
+                        tire={tire}
+                        tire_diameter={tire_diameter}
+                        color={color}
+                        roughness={roughness}
+                        wheelPositions={wheelPositions}
+                        wheelRefs={wheelRefs}
+                    />
+                )}
             </group>
         </RigidBody>
     )

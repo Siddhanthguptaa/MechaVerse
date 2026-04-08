@@ -335,9 +335,9 @@ function Editor() {
                     </div>
                 </ControlPanel>
 
-                {/* Bottom Left - Options */}
-                <ControlPanel className="bottom-6 left-6 z-40 p-4">
-                    <div className="flex flex-col gap-3">
+                {/* Bottom Center - Options */}
+                <ControlPanel className="bottom-6 left-1/2 -translate-x-1/2 z-40 p-4">
+                    <div className="flex flex-row gap-6">
                         <label className="flex items-center gap-3 cursor-pointer group">
                             <div className={`w-12 h-6 rounded-full transition-all ${cameraAutoRotate ? 'bg-gradient-to-r from-cyan-500 to-purple-500' : 'bg-gray-700'}`}>
                                 <div className={`w-5 h-5 bg-white rounded-full m-0.5 transition-transform ${cameraAutoRotate ? 'translate-x-6' : ''} shadow-lg`} />
