@@ -1,8 +1,8 @@
-# ⚙️ FormulaVerse: AI-Powered 3D Automotive Design Lab
+# ⚙️ MechaVerse: AI-Powered 3D Automotive Design Lab
 
-**FormulaVerse** is an interactive, browser-based sandbox that fuses  **real-world physics simulation**, and **3D automotive design** to redefine mechanical learning.
+**MechaVerse** is an interactive, browser-based sandbox that fuses  **real-world physics simulation**, and **3D automotive design** to redefine mechanical learning.
 
-Unlike traditional visual configurators, FormulaVerse turns *design into engineering* — giving users **real-time, data-backed feedback** on every modification.  
+Unlike traditional visual configurators, MechaVerse turns *design into engineering* — giving users **real-time, data-backed feedback** on every modification.  
 
 ---
 
@@ -53,12 +53,12 @@ Follow the steps below to set up your mobile device as a controller.
 3. **Map Controls:**  
    Assign touch controls to FormulaVerse key bindings (Select QWERTY → assign ↑ for Forward, ↓ for Backward, ← for Left, and → for Right.).
 
-4. **Launch FormulaVerse:**  
+4. **Launch MechaVerse:**  
    Start the FormulaVerse application on your PC — your phone now acts as a **wireless controller**.
 
 ---
 
-## 🧠 Why FormulaVerse?
+## 🧠 Why MechaVerse?
 
 | Feature | Description |
 |----------|--------------|
